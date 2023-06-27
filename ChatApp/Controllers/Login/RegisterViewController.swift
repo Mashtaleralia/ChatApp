@@ -6,6 +6,7 @@
 //
 
 import UIKit
+import FirebaseAuth
 
 class RegisterViewController: UIViewController {
 
@@ -123,7 +124,7 @@ class RegisterViewController: UIViewController {
     
     private let imageView: UIImageView = {
         let imageView = UIImageView()
-        imageView.image = UIImage(systemName: "person")
+        imageView.image = UIImage(systemName: "person.circle")
         imageView.tintColor = .gray
         imageView.contentMode = .scaleAspectFill
         imageView.layer.masksToBounds = true
@@ -158,10 +159,32 @@ class RegisterViewController: UIViewController {
         
         // Firebase login
         
+        DatabaseManager.shared.userExists(with: email) {[weak self] exists in
+            guard let strongSelf = self else {
+              
+                return
+            }
+            guard !exists else {
+                strongSelf.alertUserLoginError(message: "A user account for this email already exists.")
+                return
+            }
+            
+            FirebaseAuth.Auth.auth().createUser(withEmail: email, password: password, completion: { authResult, error in
+              
+                guard authResult != nil, error == nil else {
+                    print("error creating user")
+                    return
+                }
+                DatabaseManager.shared.insertUser(with: ChatAppUser(firstName: firstName, lastName: lastName, emailAddress: email))
+                strongSelf.navigationController?.dismiss(animated: true, completion: nil)
+            })
+            
+        }
+   
     }
     
-    private func alertUserLoginError() {
-        let alert = UIAlertController(title: "Oops!", message: "Please enter all information to register", preferredStyle: .alert)
+    private func alertUserLoginError(message: String =  "Please enter all information to register" ) {
+        let alert = UIAlertController(title: "Oops!", message: message, preferredStyle: .alert)
         let action = UIAlertAction(title: "Dismiss", style: .cancel, handler: nil)
         alert.addAction(action)
         present(alert, animated: true)
