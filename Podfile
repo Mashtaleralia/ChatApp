@@ -10,4 +10,7 @@ pod 'Firebase/Core'
 pod 'Firebase/Auth'
 pod 'Firebase/Database'
 
+# Google Sign IN
+pod 'GoogleSignIn'
+
 end
