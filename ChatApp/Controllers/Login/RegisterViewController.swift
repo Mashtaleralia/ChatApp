@@ -7,6 +7,7 @@
 
 import UIKit
 import FirebaseAuth
+import JGProgressHUD
 
 class RegisterViewController: UIViewController {
 
@@ -36,6 +37,8 @@ class RegisterViewController: UIViewController {
     @objc private func didTapChangeProfilePhoto() {
         presentPhotoActionSheet()
     }
+    
+    private let spinner = JGProgressHUD(style: .dark)
     
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
@@ -157,13 +160,18 @@ class RegisterViewController: UIViewController {
             return
         }
         
+        spinner.show(in: view)
+        
         // Firebase login
         
         DatabaseManager.shared.userExists(with: email) {[weak self] exists in
             guard let strongSelf = self else {
-              
                 return
             }
+            DispatchQueue.main.async {
+                strongSelf.spinner.dismiss()
+            }
+            
             guard !exists else {
                 strongSelf.alertUserLoginError(message: "A user account for this email already exists.")
                 return

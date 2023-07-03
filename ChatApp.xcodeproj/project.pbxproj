@@ -7,6 +7,7 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		846D61D12A4EEDC000872AA1 /* ChatViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 846D61D02A4EEDC000872AA1 /* ChatViewController.swift */; };
 		8492ECA02A46E5B700DF7E07 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492EC9F2A46E5B700DF7E07 /* AppDelegate.swift */; };
 		8492ECA22A46E5B700DF7E07 /* SceneDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492ECA12A46E5B700DF7E07 /* SceneDelegate.swift */; };
 		8492ECA42A46E5B700DF7E07 /* ConversationsViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = 8492ECA32A46E5B700DF7E07 /* ConversationsViewController.swift */; };
@@ -28,6 +29,7 @@
 /* Begin PBXFileReference section */
 		2394B3D7D17E538A1E690293 /* Pods-ChatApp.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-ChatApp.debug.xcconfig"; path = "Target Support Files/Pods-ChatApp/Pods-ChatApp.debug.xcconfig"; sourceTree = "<group>"; };
 		3608BF0D788CA4B127493E1C /* Pods_ChatApp.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Pods_ChatApp.framework; sourceTree = BUILT_PRODUCTS_DIR; };
+		846D61D02A4EEDC000872AA1 /* ChatViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = ChatViewController.swift; sourceTree = "<group>"; };
 		8492EC9C2A46E5B700DF7E07 /* ChatApp.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = ChatApp.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		8492EC9F2A46E5B700DF7E07 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = AppDelegate.swift; sourceTree = "<group>"; };
 		8492ECA12A46E5B700DF7E07 /* SceneDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = SceneDelegate.swift; sourceTree = "<group>"; };
@@ -109,6 +111,7 @@
 				8492ECBF2A46ECF100DF7E07 /* VideoPlayerViewController.swift */,
 				8492ECC12A46ED3700DF7E07 /* NewConversationViewController.swift */,
 				8492ECC32A46ED6000DF7E07 /* ProfileViewController.swift */,
+				846D61D02A4EEDC000872AA1 /* ChatViewController.swift */,
 			);
 			path = Controllers;
 			sourceTree = "<group>";
@@ -300,6 +303,7 @@
 				8492ECA02A46E5B700DF7E07 /* AppDelegate.swift in Sources */,
 				8492ECC42A46ED6000DF7E07 /* ProfileViewController.swift in Sources */,
 				8492ECA22A46E5B700DF7E07 /* SceneDelegate.swift in Sources */,
+				846D61D12A4EEDC000872AA1 /* ChatViewController.swift in Sources */,
 				8492ECBE2A46ECD600DF7E07 /* PhotoViewerViewController.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
