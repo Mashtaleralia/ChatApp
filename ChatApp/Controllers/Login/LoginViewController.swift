@@ -121,6 +121,8 @@ class LoginViewController: UIViewController {
                 return
             }
             let email = profile.email
+            
+            UserDefaults.standard.set(email, forKey: "email")
             guard let firstName = profile.givenName, let lastName = profile.familyName else {
                 return
             }
@@ -201,6 +203,7 @@ class LoginViewController: UIViewController {
                 return
             }
             let user = result.user
+            UserDefaults.standard.set(email, forKey: "email")
             print(user)
             strongSelf.navigationController?.dismiss(animated: true, completion: nil)
         })
