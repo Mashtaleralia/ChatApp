@@ -116,10 +116,25 @@ class ChatViewController: MessagesViewController {
         messagesCollectionView.messagesLayoutDelegate = self
         messagesCollectionView.messagesDisplayDelegate = self
         messageInputBar.delegate = self
+        setupInputButton()
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         messageInputBar.inputTextView.becomeFirstResponder()
+    }
+    
+    private func setupInputButton() {
+        let button = InputBarButtonItem()
+        button.setSize(CGSize(width: 35, height: 35), animated: false)
+        button.setImage(UIImage(systemName: "plus"), for: .normal)
+        button.onTouchUpInside{ [weak self] _ in
+            self?.presentInputActionSheet()
+        }
+        messageInputBar.setLeftStackViewWidthConstant(to: 36, animated: false)
+        messageInputBar.setStackViewItems([button], forStack: .left , animated: false)
+    }
+    private func presentInputActionSheet() {
+        
     }
 }
 
@@ -130,20 +145,31 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
         }
         
         print("Sending: \(text)")
+        let message = Message(sender: selfSender, messageId: messageId, sentDate: Date(), kind: .text(text))
         
         if isNewConversation {
             // create convo in database
-            let message = Message(sender: selfSender, messageId: messageId, sentDate: Date(), kind: .text(text))
-            DatabaseManager.shared.createNewConversation(with: otherUserEmail, name: self.title ?? "User",  firstMessage: message, completion: { success in
+            DatabaseManager.shared.createNewConversation(with: otherUserEmail, name: self.title ?? "User",  firstMessage: message, completion: { [weak self] success in
                 if success {
                     print("message sent")
+                    self?.isNewConversation = false
                 } else {
                     print("failed to send")
                 }
             })
         }
         else {
+            guard let conversationId = conversationId, let name = self.title else {
+                return
+            }
             //append to existing conversation data
+            DatabaseManager.shared.sendMessage(to: conversationId, otherUserEmail: otherUserEmail, name: name, newMessage: message, completion: { success in
+                if success {
+                    print("message sent")
+                } else {
+                    print("failed to send")
+                }
+            })
         }
     }
     private func createMassegeId() -> String? {
