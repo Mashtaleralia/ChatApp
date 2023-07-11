@@ -297,6 +297,15 @@ extension DatabaseManager {
                     return nil
                 }
                let date = ChatViewController.dateFormatter.date(from: dateString)!
+                var kind: Message?
+                if type == "photo" {
+                    // photo
+                } else {
+                    
+                }
+                guard let finalKind = kind else {
+                    return nil
+                }
                 let sender = Sender(photoURL: "", senderId: senderEmail, displayName: name)
                 
                 return Message(sender: sender, messageId: messageId, sentDate: date, kind: .text(content))
@@ -332,7 +341,10 @@ extension DatabaseManager {
                 message = messageText
             case .attributedText(_):
                 break
-            case .photo(_):
+            case .photo(let mediaItem):
+                if let targetUrl = mediaItem.url?.absoluteString {
+                    message = targetUrl
+                }
                 break
             case .video(_):
                 break
