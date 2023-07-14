@@ -468,7 +468,7 @@ extension DatabaseManager {
                             }
                             finalConversation["latest_message"] = updatedValue
 
-                            currentUserConversation[position] = finalConversation
+                            otherUserConversation[position] = finalConversation
                             strongSelf.database.child("\(otherUserEmail)/conversations").setValue(otherUserConversation, withCompletionBlock: { error, _ in
                                 guard error == nil else {
                                     completion(false)
@@ -480,6 +480,35 @@ extension DatabaseManager {
                     })
                 })
                 //completion(true)
+            }
+        })
+    }
+    public func deleteConversation(conversationId: String, completion: @escaping (Bool) -> Void) {
+        guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
+            return
+        }
+        let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+        print("deleting conversation with id: \(conversationId)")
+        let reference = database.child("\(safeEmail)/conversations")
+        reference.observeSingleEvent(of: .value, with: { snapshot in
+            if var conversations = snapshot.value as? [[String: Any]] {
+                var positionToRemove = 0
+                for conversation in conversations {
+                    if let id = conversation["id"] as? String, id == conversationId {
+                        break
+                    }
+                    positionToRemove += 1
+                }
+                conversations .remove(at: positionToRemove)
+                reference.setValue(conversations, withCompletionBlock: { error, _ in
+                    guard error == nil else {
+                        completion(false)
+                        print("failed to write new conversation array")
+                        return
+                    }
+                    print("deleted conversation")
+                    completion(true)
+                })
             }
         })
     }
