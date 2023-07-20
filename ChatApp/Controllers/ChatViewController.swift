@@ -73,7 +73,7 @@ struct Location: LocationItem {
 class ChatViewController: MessagesViewController {
     
     public var isNewConversation = false
-    private let conversationId: String?
+    private var conversationId: String?
     public let otherUserEmail: String
     
     private var senderPhotoURL: URL?
@@ -347,6 +347,10 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
                 if success {
                     print("message sent")
                     self?.isNewConversation = false
+                    let newConversationId = "conversation_\(message.messageId)"
+                    self?.conversationId = newConversationId
+                    self?.listenForMessages(id: newConversationId, shouldScrollToBottom: true)
+                    self?.messageInputBar.inputTextView.text = nil
                 } else {
                     print("failed to send")
                 }
@@ -357,8 +361,9 @@ extension ChatViewController: InputBarAccessoryViewDelegate {
                 return
             }
             //append to existing conversation data
-            DatabaseManager.shared.sendMessage(to: conversationId, otherUserEmail: otherUserEmail, name: name, newMessage: message, completion: { success in
+            DatabaseManager.shared.sendMessage(to: conversationId, otherUserEmail: otherUserEmail, name: name, newMessage: message, completion: { [weak self] success in
                 if success {
+                    self?.messageInputBar.inputTextView.text = nil
                     print("message sent")
                 } else {
                     print("failed to send")
@@ -476,7 +481,7 @@ extension ChatViewController: MessagesDataSource, MessagesLayoutDelegate, Messag
                 StorageManager.shared.downloadUrl(for: path, completion: { [weak self] result in
                     switch result {
                     case .success(let url):
-                        self?.otherUserPhotoURL = url
+                        self?.otherUserPhotoURL  = url
                         DispatchQueue.main.async {
                             avatarView.sd_setImage(with: url, completed: nil)
                         }

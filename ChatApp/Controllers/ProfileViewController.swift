@@ -48,7 +48,8 @@ class ProfileViewController: UIViewController {
                 
                 guard let strongSelf = self else {return}
                 
-                
+                UserDefaults.standard.setValue(nil, forKey: "email")
+                UserDefaults.standard.setValue(nil, forKey: "name")
                 
                 // Google log out
                 GIDSignIn.sharedInstance.signOut()
