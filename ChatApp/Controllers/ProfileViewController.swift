@@ -36,7 +36,7 @@ class ProfileViewController: UIViewController {
                                      title: "Name:\(UserDefaults.standard.value(forKey: "name") as? String ?? "No name")",
                                      handler: nil))
         data.append(ProfileViewModel(viewModelType: .info,
-                                     title: "Name:\(UserDefaults.standard.value(forKey: "email") as? String ?? "No email ")",
+                                     title: "Email:\(UserDefaults.standard.value(forKey: "email") as? String ?? "No email ")",
                                      handler: nil))
         data.append(ProfileViewModel(viewModelType: .logout,
                                      title: "Log Out", handler: { [weak self] in
@@ -47,6 +47,8 @@ class ProfileViewController: UIViewController {
             actionSheet.addAction(UIAlertAction(title: "Log out", style: .destructive, handler: { [weak self] _ in
                 
                 guard let strongSelf = self else {return}
+                
+                
                 
                 // Google log out
                 GIDSignIn.sharedInstance.signOut()
@@ -81,10 +83,10 @@ class ProfileViewController: UIViewController {
         let fileName = safeEmail + "_profile_picture.png"
         let path = "images/" + fileName
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.width, height: 300))
-        headerView.backgroundColor = .link
+        headerView.backgroundColor = .systemBackground
         let imageView = UIImageView(frame: CGRect(x: (headerView.width-150)/2 , y: 75, width: 150, height: 150))
         imageView.contentMode = .scaleAspectFill
-        imageView.backgroundColor = .white
+        imageView.backgroundColor = .systemBackground
         imageView.layer.borderColor = UIColor.white.cgColor
         imageView.layer.borderWidth = 3
         imageView.layer.masksToBounds = true
@@ -104,7 +106,6 @@ class ProfileViewController: UIViewController {
    
 
 }
-
 extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let viewModel = data[indexPath.row]
