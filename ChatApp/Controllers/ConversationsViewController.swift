@@ -23,7 +23,7 @@ struct LatestMessage {
     let isRead: Bool
 }
 
-class ConversationsViewController: UIViewController {
+final class ConversationsViewController: UIViewController {
     
     private let tableView: UITableView = {
         let tableView = UITableView()
