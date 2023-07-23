@@ -76,6 +76,18 @@ class ProfileViewController: UIViewController {
         tableView.tableHeaderView = createTableHeader()
     }
     
+    private let imageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.isUserInteractionEnabled = true
+        imageView.contentMode = .scaleAspectFill
+        imageView.backgroundColor = .systemBackground
+        imageView.layer.borderColor = UIColor.white.cgColor
+        imageView.layer.borderWidth = 3
+        imageView.layer.masksToBounds = true
+        
+        return imageView
+    }()
+    
     func createTableHeader() -> UIView? {
         guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
             return nil
@@ -85,23 +97,56 @@ class ProfileViewController: UIViewController {
         let path = "images/" + fileName
         let headerView = UIView(frame: CGRect(x: 0, y: 0, width: view.width, height: 300))
         headerView.backgroundColor = .systemBackground
-        let imageView = UIImageView(frame: CGRect(x: (headerView.width-150)/2 , y: 75, width: 150, height: 150))
-        imageView.contentMode = .scaleAspectFill
-        imageView.backgroundColor = .systemBackground
-        imageView.layer.borderColor = UIColor.white.cgColor
-        imageView.layer.borderWidth = 3
-        imageView.layer.masksToBounds = true
+        imageView.frame = CGRect(x: (headerView.width-150)/2 , y: 75, width: 150, height: 150)
+//        imageView.isUserInteractionEnabled = true
+//        imageView.contentMode = .scaleAspectFill
+//        imageView.backgroundColor = .systemBackground
+//        imageView.layer.borderColor = UIColor.white.cgColor
+//        imageView.layer.borderWidth = 3
+//        imageView.layer.masksToBounds = true
         imageView.layer.cornerRadius = imageView.width / 2
         headerView.addSubview(imageView)
+       
         StorageManager.shared.downloadUrl(for: path, completion: { result in
             switch result {
             case .success(let url):
-                imageView.sd_setImage(with: url, completed: nil)
+                self.imageView.sd_setImage(with: url, completed: nil)
             case .failure(let error):
                 print("Failed to get download url: \(error)")
             }
         })
+        let gestureRecognizer = UITapGestureRecognizer(target: self, action: #selector(didTapUserAvatar))
+        gestureRecognizer.numberOfTapsRequired = 1
+        
+        imageView.addGestureRecognizer(gestureRecognizer)
+
         return headerView
+    }
+    
+    @objc private func didTapUserAvatar() {
+       presentPhotoPicker()
+        
+    }
+    
+    private func updateUserAvatar(with image: UIImage) {
+       
+       
+        
+        guard let data = image.pngData(),  let email = UserDefaults.standard.value(forKey: "email") as? String else {
+            return
+        }
+        let safeEmail =  DatabaseManager.safeEmail(emailAddress: email)
+        let filename = "\(safeEmail)_profile_picture.png"
+        StorageManager.shared.uploadProfilePicture(with: data, fileName: filename) { result in
+            switch result {
+            case .success(let downloadUrl):
+                UserDefaults.standard.set(downloadUrl, forKey: "profile_picture_url")
+            case .failure(let error):
+                print(error)
+                
+            }
+            
+        }
     }
     
    
@@ -123,6 +168,7 @@ extension ProfileViewController: UITableViewDelegate, UITableViewDataSource {
         tableView.deselectRow(at: indexPath, animated: true)
         let viewModel = data[indexPath.row].handler?()
     }
+    
 }
 
 class ProfileTableViewCell: UITableViewCell {
@@ -140,4 +186,52 @@ class ProfileTableViewCell: UITableViewCell {
             self.textLabel?.textAlignment = .center
         }
     }
+}
+
+extension ProfileViewController: UIImagePickerControllerDelegate, UINavigationControllerDelegate {
+    
+    private func presentPhotoPicker() {
+        let actionSheet = UIAlertController(title: "Change photo", message: "ppppp", preferredStyle: .actionSheet)
+        actionSheet.addAction(UIAlertAction(title: "Take a photo", style: .default, handler: { [weak self] _ in
+            self?.takePhoto()
+        }))
+        actionSheet.addAction(UIAlertAction(title: "Choose a photo", style: .default, handler: { [weak self] _ in
+            self?.pickPhoto()
+        }))
+        actionSheet.addAction(UIAlertAction(title: "Cancel", style: .cancel, handler: nil))
+        present(actionSheet, animated: true)
+    }
+    
+    private func takePhoto() {
+        let picker = UIImagePickerController()
+        picker.sourceType = .camera
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true)
+    }
+    
+    private func pickPhoto() {
+        let picker = UIImagePickerController()
+        picker.sourceType = .photoLibrary
+        picker.delegate = self
+        picker.allowsEditing = true
+        present(picker, animated: true)
+    }
+    
+    func imagePickerControllerDidCancel(_ picker: UIImagePickerController) {
+        picker.dismiss(animated: true, completion: nil)
+    }
+    
+    func imagePickerController(_ picker: UIImagePickerController, didFinishPickingMediaWithInfo info: [UIImagePickerController.InfoKey : Any]) {
+        picker.dismiss(animated: true, completion: nil)
+        guard let editedImage = info[UIImagePickerController.InfoKey.editedImage] as? UIImage else {
+            return
+        }
+        updateUserAvatar(with: editedImage)
+        imageView.image = editedImage
+        
+    }
+    
+    
+    
 }
