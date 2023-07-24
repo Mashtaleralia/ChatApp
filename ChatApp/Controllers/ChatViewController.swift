@@ -133,6 +133,21 @@ class ChatViewController: MessagesViewController {
         let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
         return Sender(photoURL: "", senderId: safeEmail, displayName: self.title ?? "Me")
     }
+    
+    private let avatarImageView: UIImageView = {
+        let imageView = UIImageView()
+        imageView.layer.cornerRadius = 20
+        imageView.contentMode = .scaleAspectFill
+        imageView.backgroundColor = .systemBackground
+        imageView.isUserInteractionEnabled = true
+        imageView.layer.masksToBounds = true
+        return imageView
+    }()
+    
+    override func viewDidLayoutSubviews() {
+        super.viewDidLayoutSubviews()
+        
+    }
  
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -143,10 +158,57 @@ class ChatViewController: MessagesViewController {
         messagesCollectionView.messageCellDelegate = self
         messageInputBar.delegate = self
         setupInputButton()
+        
+       
+        avatarImageView.translatesAutoresizingMaskIntoConstraints = false
+        avatarImageView.addConstraint(NSLayoutConstraint(item: avatarImageView, attribute: .width, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 40.0))
+        avatarImageView.addConstraint(NSLayoutConstraint(item: avatarImageView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 40.0))
+       
+        configureAvatar()
+        navigationItem.rightBarButtonItem = UIBarButtonItem(customView: avatarImageView)
+        avatarImageView.isUserInteractionEnabled = true
+        let gesture = UITapGestureRecognizer(target: self, action: #selector(openRecipientProfile))
+        gesture.numberOfTapsRequired = 1
+        gesture.numberOfTouchesRequired = 1
+        avatarImageView.addGestureRecognizer(gesture)
+        if let layout = messagesCollectionView.collectionViewLayout as? MessagesCollectionViewFlowLayout {
+            layout.textMessageSizeCalculator.outgoingAvatarSize = .zero
+            layout.textMessageSizeCalculator.incomingAvatarSize = .zero
+        }
+        
+    }
+    @objc private func openRecipientProfile() {
+        let vc = RecipientProfileViewController(recipientName: otherUserEmail, recipientPhotoUrl: otherUserPhotoURL)
+        navigationController?.pushViewController(vc, animated: true)
     }
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         messageInputBar.inputTextView.becomeFirstResponder()
+    }
+    override func viewWillDisappear(_ animated: Bool) {
+        
+    }
+    
+    private func configureAvatar() {
+        if let otherUserPhotoUrl = self.otherUserPhotoURL {
+            avatarImageView.sd_setImage(with: otherUserPhotoUrl, completed: nil)
+        } else {
+            let email = self.otherUserEmail
+            let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+            let path = "images/\(safeEmail)_profile_picture.png"
+            StorageManager.shared.downloadUrl(for: path, completion: { [weak self] result in
+                switch result {
+                case .success(let url):
+                    DispatchQueue.main.async {
+                        self?.otherUserPhotoURL = url
+                        self?.avatarImageView.sd_setImage(with: url, completed: nil)
+                    }
+                case .failure(let error):
+                    print("error setting avatar image \(error)")
+                }
+            
+            })
+        }
     }
     
     private func setupInputButton() {
@@ -444,54 +506,56 @@ extension ChatViewController: MessagesDataSource, MessagesLayoutDelegate, Messag
         }
         return .secondarySystemBackground
     }
-    func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
-        let sender = message.sender
-        
-        if sender.senderId == selfSender?.senderId {
-            if let currentUserImageURL = self.senderPhotoURL {
-                avatarView.sd_setImage(with: currentUserImageURL, completed: nil)
-            } else {
-                // fetch url
-                guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
-                    return
-                }
-                
-                let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
-                let path = "images/\(safeEmail)_profile_picture.png"
-                StorageManager.shared.downloadUrl(for: path, completion: { [weak self] result in
-                    switch result {
-                    case .success(let url):
-                        self?.senderPhotoURL = url
-                        DispatchQueue.main.async {
-                            avatarView.sd_setImage(with: url, completed: nil)
-                        }
-                    case .failure(let error):
-                        print("\(error)")
-                    }
-                })
-            }
-        } else {
-            if let otherUserImageURL = self.otherUserPhotoURL {
-                avatarView.sd_setImage(with: otherUserImageURL, completed: nil)
-            } else {
-                let email = self.otherUserEmail
-                
-                let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
-                let path = "images/\(safeEmail)_profile_picture.png"
-                StorageManager.shared.downloadUrl(for: path, completion: { [weak self] result in
-                    switch result {
-                    case .success(let url):
-                        self?.otherUserPhotoURL  = url
-                        DispatchQueue.main.async {
-                            avatarView.sd_setImage(with: url, completed: nil)
-                        }
-                    case .failure(let error):
-                        print("\(error)")
-                    }
-                })
-            }
+ func configureAvatarView(_ avatarView: AvatarView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
+     avatarView.isHidden = true
+    
+//        let sender = message.sender
+//
+//        if sender.senderId == selfSender?.senderId {
+//            if let currentUserImageURL = self.senderPhotoURL {
+//                avatarView.sd_setImage(with: currentUserImageURL, completed: nil)
+//            } else {
+//                // fetch url
+//                guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
+//                    return
+//                }
+//
+//                let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+//                let path = "images/\(safeEmail)_profile_picture.png"
+//                StorageManager.shared.downloadUrl(for: path, completion: { [weak self] result in
+//                    switch result {
+//                    case .success(let url):
+//                        self?.senderPhotoURL = url
+//                        DispatchQueue.main.async {
+//                            avatarView.sd_setImage(with: url, completed: nil)
+//                        }
+//                    case .failure(let error):
+//                        print("\(error)")
+//                    }
+//                })
+//            }
+//        } else {
+//            if let otherUserImageURL = self.otherUserPhotoURL {
+//                avatarView.sd_setImage(with: otherUserImageURL, completed: nil)
+//            } else {
+//                let email = self.otherUserEmail
+//
+//                let safeEmail = DatabaseManager.safeEmail(emailAddress: email)
+//                let path = "images/\(safeEmail)_profile_picture.png"
+//                StorageManager.shared.downloadUrl(for: path, completion: { [weak self] result in
+//                    switch result {
+//                    case .success(let url):
+//                        self?.otherUserPhotoURL  = url
+//                        DispatchQueue.main.async {
+//                            avatarView.sd_setImage(with: url, completed: nil)
+//                        }
+//                    case .failure(let error):
+//                        print("\(error)")
+//                    }
+//                })
+//            }
+//        }
         }
-    }
 }
 extension ChatViewController: MessageCellDelegate {
     func didTapImage (in cell: MessageCollectionViewCell) {
