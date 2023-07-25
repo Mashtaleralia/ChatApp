@@ -8,20 +8,25 @@
 import UIKit
 import SDWebImage
 
+
+
 class RecipientProfileViewController: UIViewController {
 
+    private var recipientName: String
+    private var recipientPhotoUrl: URL?
+    let conversationId: String?
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
         createProfileHeader()
         
     }
-    var recipientName: String
-    var recipientPhotoUrl: URL?
     
-    init(recipientName: String, recipientPhotoUrl: URL?) {
+    init(recipientName: String, recipientPhotoUrl: URL?, conversationId: String? ) {
         self.recipientName = recipientName
         self.recipientPhotoUrl = recipientPhotoUrl
+        self.conversationId = conversationId
         super.init(nibName: nil, bundle: nil)
     }
     
@@ -82,13 +87,20 @@ class RecipientProfileViewController: UIViewController {
             button.heightAnchor.constraint(equalToConstant: dimension).isActive = true
             button.widthAnchor.constraint(equalToConstant: dimension).isActive = true
             prevView = button
+            button.addTarget(self, action: #selector(didTapActionButton), for: .touchUpInside)
             
         }
         
     }
     
-    private func createActionButtons() {
-      
+    @objc private func didTapActionButton() {
+        let vc = SearchMessagesViewController(conversationId: conversationId)
+        let navVC = UINavigationController(rootViewController: vc)
+        navVC.modalPresentationStyle = .fullScreen
+        
+        present(navVC, animated: true)
+       
+       
     }
     
     

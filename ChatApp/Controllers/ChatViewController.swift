@@ -70,6 +70,8 @@ struct Location: LocationItem {
     
 }
 
+
+
 class ChatViewController: MessagesViewController {
     
     public var isNewConversation = false
@@ -80,6 +82,8 @@ class ChatViewController: MessagesViewController {
     private var otherUserPhotoURL: URL?
     
     private var messages = [Message]()
+    
+    
     
     public static var dateFormatter: DateFormatter = {
         let formatter = DateFormatter()
@@ -92,15 +96,19 @@ class ChatViewController: MessagesViewController {
     init(with email: String, id: String?) {
         self.conversationId = id
         self.otherUserEmail = email
+        
         super.init(nibName: nil, bundle: nil)
         if let conversationId = conversationId {
             listenForMessages(id: conversationId, shouldScrollToBottom: true)
+            
         }
     }
     
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
+    
+   
     
     private func listenForMessages(id: String, shouldScrollToBottom: Bool) {
         DatabaseManager.shared.getAllMessagesForConversation(with: id, completion: { [weak self] result in
@@ -157,6 +165,7 @@ class ChatViewController: MessagesViewController {
         messagesCollectionView.messagesDisplayDelegate = self
         messagesCollectionView.messageCellDelegate = self
         messageInputBar.delegate = self
+  
         setupInputButton()
         
        
@@ -176,9 +185,10 @@ class ChatViewController: MessagesViewController {
             layout.textMessageSizeCalculator.incomingAvatarSize = .zero
         }
         
+        
     }
     @objc private func openRecipientProfile() {
-        let vc = RecipientProfileViewController(recipientName: otherUserEmail, recipientPhotoUrl: otherUserPhotoURL)
+        let vc = RecipientProfileViewController(recipientName: otherUserEmail, recipientPhotoUrl: otherUserPhotoURL, conversationId: conversationId)
         navigationController?.pushViewController(vc, animated: true)
     }
     override func viewDidAppear(_ animated: Bool) {
@@ -584,3 +594,4 @@ extension ChatViewController: MessageCellDelegate {
         }
     }
 }
+
