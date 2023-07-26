@@ -7,6 +7,7 @@
 
 import UIKit
 import SDWebImage
+import MessageKit
 
 
 
@@ -20,6 +21,7 @@ class RecipientProfileViewController: UIViewController {
         super.viewDidLoad()
         view.backgroundColor = .white
         createProfileHeader()
+       
         
     }
     

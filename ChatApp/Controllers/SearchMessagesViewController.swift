@@ -7,6 +7,7 @@
 
 import UIKit
 import MessageKit
+import SDWebImage
 
 class SearchMessagesViewController: MessagesViewController {
     
@@ -39,12 +40,19 @@ class SearchMessagesViewController: MessagesViewController {
     
     override func viewDidLoad() {
         super.viewDidLoad()
+        searchBar.delegate = self
         messagesCollectionView.messagesDataSource = self
         messagesCollectionView.messagesDisplayDelegate = self
         messagesCollectionView.messagesLayoutDelegate = self
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.topItem?.titleView = searchBar
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(dismissSelf))
+        if let layout = messagesCollectionView.collectionViewLayout as? MessagesCollectionViewFlowLayout {
+            layout.textMessageSizeCalculator.outgoingAvatarSize = .zero
+            layout.textMessageSizeCalculator.incomingAvatarSize = .zero
+        }
+        searchBar.becomeFirstResponder()
+       
     }
     
     @objc private func dismissSelf() {
@@ -83,6 +91,23 @@ extension SearchMessagesViewController: MessagesDataSource, MessagesDisplayDeleg
         return messages.count
     }
     
+    func configureMediaMessageImageView(_ imageView: UIImageView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
+        guard let message = message as? Message else {
+            return
+        }
+        switch message.kind {
+        case .photo(let media):
+            guard let url = media.url else {
+                return
+            }
+            imageView.sd_setImage(with: url, completed: nil)
+        default:
+            break
+        
+        }
+        
+    }
+    
     func currentSender() -> SenderType {
         if let sender = selfSender {
             return sender
@@ -90,4 +115,27 @@ extension SearchMessagesViewController: MessagesDataSource, MessagesDisplayDeleg
         fatalError("email should be chached")
     }
     
+}
+
+extension SearchMessagesViewController: UISearchBarDelegate {
+    func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
+        guard let text = searchBar.text, !text.replacingOccurrences(of: " ", with: "").isEmpty else {
+            return
+        }
+        search(text)
+        
+    }
+    private func search(_ query: String) {
+        var filteredMessages = messages?.filter {
+             switch $0.kind {
+             case .text(let text):
+                 return text.contains(query.lowercased())
+             default:
+                 break
+             }
+            return false
+        }
+        
+        print(filteredMessages)
+    }
 }
