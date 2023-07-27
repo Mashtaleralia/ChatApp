@@ -9,11 +9,25 @@ import UIKit
 import MessageKit
 import SDWebImage
 
+struct SearchedMessages: MessageType {
+    var sender: SenderType
+    
+    var messageId: String
+    
+    var sentDate: Date
+    
+    var kind: MessageKind
+    
+    var index: Int
+    
+}
+
 class SearchMessagesViewController: MessagesViewController {
     
  
     private var conversationId: String?
     private var messages: [Message]?
+    private var searchedMessages: [Message]?
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "Search for messages"
@@ -73,7 +87,17 @@ class SearchMessagesViewController: MessagesViewController {
             }
         })
     }
+    
+    private func scrollToSearchedMessage() {
+        print(searchedMessages)
+        guard let searchedMessages = searchedMessages, !searchedMessages.isEmpty, let index = messages?.firstIndex(of: searchedMessages[0]) else {
+            return
+        }
 
+        self.messagesCollectionView.scrollToItem(at: IndexPath(row: 0, section: index), at: .centeredVertically, animated: true)
+    }
+
+    
 }
 
 extension SearchMessagesViewController: MessagesDataSource, MessagesDisplayDelegate, MessagesLayoutDelegate {
@@ -124,18 +148,28 @@ extension SearchMessagesViewController: UISearchBarDelegate {
         }
         search(text)
         
+        scrollToSearchedMessage()
+        
     }
     private func search(_ query: String) {
         var filteredMessages = messages?.filter {
              switch $0.kind {
              case .text(let text):
-                 return text.contains(query.lowercased())
+                 return text.contains(query) || text.contains(query.lowercased())
              default:
                  break
              }
             return false
         }
         
-        print(filteredMessages)
+        self.searchedMessages = filteredMessages
     }
+}
+
+extension Message: Equatable {
+    static func == (lhs: Message, rhs: Message) -> Bool {
+        return lhs.messageId == rhs.messageId
+    }
+    
+    
 }
