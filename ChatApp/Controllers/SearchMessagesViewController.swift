@@ -34,6 +34,7 @@ class SearchMessagesViewController: MessagesViewController {
         return searchBar
     }()
     
+    private var messageIndex = 0
     private var selfSender: Sender? {
         guard let email = UserDefaults.standard.value(forKey: "email") as? String else {
             return nil
@@ -60,13 +61,45 @@ class SearchMessagesViewController: MessagesViewController {
         messagesCollectionView.messagesLayoutDelegate = self
         view.backgroundColor = .systemBackground
         navigationController?.navigationBar.topItem?.titleView = searchBar
+        configureToolBar()
+        
         navigationItem.rightBarButtonItem = UIBarButtonItem(title: "Cancel", style: .done, target: self, action: #selector(dismissSelf))
+        
         if let layout = messagesCollectionView.collectionViewLayout as? MessagesCollectionViewFlowLayout {
             layout.textMessageSizeCalculator.outgoingAvatarSize = .zero
             layout.textMessageSizeCalculator.incomingAvatarSize = .zero
         }
         searchBar.becomeFirstResponder()
        
+       
+    }
+    
+    private func configureToolBar() {
+        // Изменить цвет кнопок
+        navigationController?.toolbar.tintColor = .black
+        
+        let appearance = UIToolbarAppearance()
+        appearance.configureWithOpaqueBackground()
+
+        navigationController?.toolbar.standardAppearance = appearance
+        navigationController?.toolbar.scrollEdgeAppearance = appearance
+
+        var buttons = [UIBarButtonItem]()
+
+        buttons.append( UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil) )
+                
+        buttons.append(UIBarButtonItem(image: UIImage(systemName: "backward"), style: .plain, target: self, action: #selector(scrollDownToSearchMessage)))
+
+        buttons.append(UIBarButtonItem(barButtonSystemItem: .flexibleSpace, target: self, action: nil))
+                
+        buttons.append(UIBarButtonItem(image: UIImage(systemName: "forward"), style: .plain, target: self, action: #selector(scrollToSearchedMessage)))
+
+        // Добавляем кнопки и отступы
+        self.toolbarItems = buttons
+
+        // Показать toolBar
+        navigationController?.setToolbarHidden(false, animated: true)
+
     }
     
     @objc private func dismissSelf() {
@@ -88,11 +121,22 @@ class SearchMessagesViewController: MessagesViewController {
         })
     }
     
-    private func scrollToSearchedMessage() {
-        print(searchedMessages)
-        guard let searchedMessages = searchedMessages, !searchedMessages.isEmpty, let index = messages?.firstIndex(of: searchedMessages[0]) else {
+    @objc private func scrollDownToSearchMessage() {
+        guard let searchedMessages = searchedMessages, !searchedMessages.isEmpty,(0...searchedMessages.count - 1).contains(messageIndex), let index = messages?.firstIndex(of: searchedMessages[messageIndex]) else {
             return
         }
+        messageIndex -= 1
+
+        self.messagesCollectionView.scrollToItem(at: IndexPath(row: 0, section: index), at: .centeredVertically, animated: true)
+    }
+    
+    @objc private func scrollToSearchedMessage() {
+       
+        print(searchedMessages)
+        guard let searchedMessages = searchedMessages, !searchedMessages.isEmpty,(0...searchedMessages.count - 1).contains(messageIndex), let index = messages?.firstIndex(of: searchedMessages[messageIndex]) else {
+            return
+        }
+        messageIndex += 1
 
         self.messagesCollectionView.scrollToItem(at: IndexPath(row: 0, section: index), at: .centeredVertically, animated: true)
     }
@@ -147,6 +191,7 @@ extension SearchMessagesViewController: UISearchBarDelegate {
             return
         }
         search(text)
+        messageIndex = 0
         
         scrollToSearchedMessage()
         
