@@ -17,11 +17,17 @@ class RecipientProfileViewController: UIViewController {
     private var recipientPhotoUrl: URL?
     let conversationId: String?
     
+    private let scrollView: UIScrollView = {
+        let scrollView = UIScrollView()
+        scrollView.isScrollEnabled = true
+        return scrollView
+    }()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         view.backgroundColor = .white
+    
         createProfileHeader()
-       
         
     }
     
@@ -35,8 +41,7 @@ class RecipientProfileViewController: UIViewController {
     required init?(coder: NSCoder) {
         fatalError("init(coder:) has not been implemented")
     }
-    
-   
+ 
     
     private func createProfileHeader() {
         let headerView = UIView()
@@ -50,10 +55,12 @@ class RecipientProfileViewController: UIViewController {
         let userNameLabel = UILabel()
         userNameLabel.font = UIFont.systemFont(ofSize: 25)
         userNameLabel.tintColor = .black
+        view.addSubview(headerView)
         headerView.addSubview(userImageView)
         headerView.addSubview(userNameLabel)
-        view.addSubview(headerView)
-
+        
+       
+        
         headerView.translatesAutoresizingMaskIntoConstraints = false
         headerView.leadingAnchor.constraint(equalTo:view.leadingAnchor, constant: 0).isActive = true
         headerView.trailingAnchor.constraint(equalTo:view.trailingAnchor, constant: 0).isActive = true
@@ -69,38 +76,77 @@ class RecipientProfileViewController: UIViewController {
         
 //        view.addConstraint(NSLayoutConstraint(item: headerView, attribute: .height, relatedBy: .equal, toItem: nil, attribute: .notAnAttribute, multiplier: 1.0, constant: 100))
         let icons = ["phone.fill", "video.fill", "bell.fill", "magnifyingglass", "ellipsis"]
+        let callButton = UIButton()
+        let videoButton = UIButton()
+        let muteButton = UIButton()
+        let searchButton = UIButton()
+        let moreButton = UIButton()
+        let buttons = [callButton, videoButton, muteButton, searchButton, moreButton]
         var prevView = headerView
         for i in 0 ..< 5 {
-            let button = UIButton()
-            button.backgroundColor = .secondarySystemFill
-            button.layer.cornerRadius = 10
-            headerView.addSubview(button)
-            button.translatesAutoresizingMaskIntoConstraints = false
-            let image = UIImage(systemName: icons[i])
-            button.setImage(image, for: .normal)
             
-            button.topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 15).isActive = true
+            buttons[i].backgroundColor = .secondarySystemFill
+            buttons[i].layer.cornerRadius = 10
+            headerView.addSubview(buttons[i])
+            buttons[i].translatesAutoresizingMaskIntoConstraints = false
+            let image = UIImage(systemName: icons[i])
+            buttons[i].setImage(image, for: .normal)
+            
+            buttons[i].topAnchor.constraint(equalTo: userNameLabel.bottomAnchor, constant: 15).isActive = true
             if i == 0 {
-                button.leadingAnchor.constraint(equalTo: prevView.leadingAnchor, constant: 15).isActive = true
+                buttons[i].leadingAnchor.constraint(equalTo: prevView.leadingAnchor, constant: 15).isActive = true
             } else {
-                button.leadingAnchor.constraint(equalTo: prevView.trailingAnchor, constant: 15).isActive = true
+                buttons[i].leadingAnchor.constraint(equalTo: prevView.trailingAnchor, constant: 15).isActive = true
             }
             let dimension = (view.width - 15*6) / 5
-            button.heightAnchor.constraint(equalToConstant: dimension).isActive = true
-            button.widthAnchor.constraint(equalToConstant: dimension).isActive = true
-            prevView = button
-            button.addTarget(self, action: #selector(didTapActionButton), for: .touchUpInside)
-            
+            buttons[i].heightAnchor.constraint(equalToConstant: dimension).isActive = true
+            buttons[i].widthAnchor.constraint(equalToConstant: dimension).isActive = true
+            prevView = buttons[i]
+           // buttons[i].addTarget(self, action: #selector(didTapActionButton), for: .touchUpInside)
+            switch i {
+            case 0:
+                buttons[i].addTarget(self, action: #selector(didTapPhoneButton), for: .touchUpInside)
+            case 1:
+                buttons[i].addTarget(self, action: #selector(didTapVideoButton), for: .touchUpInside)
+            case 2:
+                buttons[i].addTarget(self, action: #selector(didTapMuteButton), for: .touchUpInside)
+            case 3:
+                buttons[i].addTarget(self, action: #selector(didTapSearchButton), for: .touchUpInside)
+            case 4:
+                buttons[i].addTarget(self, action: #selector(didTapMoreButton), for: .touchUpInside)
+            default:
+                break
+            }
         }
         
     }
     
-    @objc private func didTapActionButton() {
+    @objc private func didTapSearchButton() {
         let vc = SearchMessagesViewController(conversationId: conversationId)
         let navVC = UINavigationController(rootViewController: vc)
         navVC.modalPresentationStyle = .fullScreen
         
         present(navVC, animated: true)
+       
+       
+    }
+    @objc private func didTapPhoneButton() {
+      
+       
+       
+    }
+    @objc private func didTapVideoButton() {
+       
+       
+       
+    }
+    @objc private func didTapMuteButton() {
+       
+       
+       
+    }
+    @objc private func didTapMoreButton() {
+    
        
        
     }

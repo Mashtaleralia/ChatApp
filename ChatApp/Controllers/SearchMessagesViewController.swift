@@ -27,7 +27,11 @@ class SearchMessagesViewController: MessagesViewController {
  
     private var conversationId: String?
     private var messages: [Message]?
-    private var searchedMessages: [Message]?
+    private var searchedMessages: [Message]? {
+        didSet {
+            messagesCollectionView.reloadData()
+        }
+    }
     private let searchBar: UISearchBar = {
         let searchBar = UISearchBar()
         searchBar.placeholder = "Search for messages"
@@ -149,6 +153,7 @@ extension SearchMessagesViewController: MessagesDataSource, MessagesDisplayDeleg
         guard let messages = messages else {
             return Message(sender: selfSender!, messageId: "", sentDate: Date(), kind: .text(""))
         }
+       
         return messages[indexPath.section]
     }
     
@@ -157,6 +162,17 @@ extension SearchMessagesViewController: MessagesDataSource, MessagesDisplayDeleg
             return 0
         }
         return messages.count
+    }
+    
+    func textColor(for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) -> UIColor {
+        if let message = message as? Message, let searchedMessages = searchedMessages, searchedMessages.contains(message) {
+            return UIColor.orange
+        }
+        let sender = message.sender
+        if sender.senderId != selfSender?.senderId {
+            return .darkText
+        }
+        return .white
     }
     
     func configureMediaMessageImageView(_ imageView: UIImageView, for message: MessageType, at indexPath: IndexPath, in messagesCollectionView: MessagesCollectionView) {
